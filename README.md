@@ -10,8 +10,6 @@ Para correr el backend con la base de datos mongodb:
 - ejecutar: ´docker compose up -d´
 
 # Importante
-- La base de datos es creada SOLO con el administrador (no modificar nombre de usuario, solo cambiar contraseña si lo ve necesario).
-- Nombre de usuario: admin, contraseña: adminadmin.
 - Debe crear nuevos usuarios para probar (No olvidar la contraseña de un usuario, recuperarla es casi imposible).
 
 # Documentacion
