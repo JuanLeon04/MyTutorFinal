@@ -1,0 +1,61 @@
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: mytutormongodb
+    restart: unless-stopped
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=admin
+      - MONGO_INITDB_DATABASE=mytutor
+    volumes:
+      - mytutormongodb_data:/data/db
+      - mytutormongodb_config:/data/configdb
+      - ./init_db_mongo.js:/docker-entrypoint-initdb.d/init.js:ro
+    ports:
+      - "27017:27017"
+    networks:
+      - mytutor-network
+
+  mytutorbackend:
+    build:
+      context: ./mytutor_backend_no_sql
+      dockerfile: Dockerfile
+    container_name: mytutorbackend
+    restart: unless-stopped
+    environment:
+      - BACK_SERVER_PORT=8081
+      - BACK_SERVER_IP=0.0.0.0
+      - CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,http://mytutorfrontend:3000
+      - CORS_ALLOWED_METHODS=GET,POST,PUT,DELETE,OPTIONS
+      - CORS_ALLOW_CREDENTIALS=true
+      - MONGO_URI=mongodb://admin:admin@mytutormongodb:27017/mytutor?authSource=admin
+      - MONGO_DATABASE=mytutor
+      - LOGGING_MODE=DEBUG
+    ports:
+      - "8081:8081"
+    depends_on:
+      - mongodb
+    networks:
+      - mytutor-network
+
+  mytutorfrontend:
+    build:
+      context: ./mytutor_frontend_react
+      dockerfile: Dockerfile
+    container_name: mytutorfrontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - mytutorbackend
+    networks:
+      - mytutor-network
+
+volumes:
+  mytutormongodb_data:
+  mytutormongodb_config:
+
+networks:
+  mytutor-network:
+    driver: bridge
+
